@@ -28,7 +28,7 @@ action :create do
       action :run
 
       user new_resource.username
-      group new_resource.username
+      group new_resource.group || new_resource.username
 
       only_if do
         ::File.directory? homesick_directory_for(key) and new_commits_for? homesick_directory_for(key)
@@ -42,7 +42,7 @@ action :create do
       action :run
 
       user new_resource.username
-      group new_resource.username
+      group new_resource.group || new_resource.username
 
       not_if do
         ::File.directory? homesick_directory_for(key)
@@ -56,7 +56,7 @@ action :create do
       action :nothing
 
       user new_resource.username
-      group new_resource.username
+      group new_resource.group || new_resource.username
 
       only_if do
         ::File.directory? homesick_directory_for(key)
@@ -74,7 +74,7 @@ action :delete do
       action :run
 
       user new_resource.username
-      group new_resource.username
+      group new_resource.group || new_resource.username
 
       only_if do
         ::File.directory? homesick_directory_for(key)
