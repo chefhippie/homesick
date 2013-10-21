@@ -89,6 +89,14 @@ action :delete do
   new_resource.updated_by_last_action(true)
 end
 
+def new_commits_for?(directory)
+  `cd #{directory}; git rev-list HEAD...origin/master --count`.strip != "0"
+end
+
+def homesick_directory_for(key)
+  "#{home_directory}/.homesick/repos/#{key}"
+end
+
 protected
 
 def home_directory
@@ -101,12 +109,4 @@ def home_directory
       "/home/#{new_resource.username}"
     end
   end
-end
-
-def homesick_directory_for(key)
-  "#{home_directory}/.homesick/repos/#{key}"
-end
-
-def new_commits_for?(directory)
-  `cd #{directory}; git rev-list HEAD...origin/master --count`.strip != "0"
 end
