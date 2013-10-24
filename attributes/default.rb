@@ -17,6 +17,6 @@
 # limitations under the License.
 #
 
-default["homesick"]["gems"] = %w(
-  homesick
+default["homesick"]["packages"] = %w(
+  rubygem-homesick
 )
