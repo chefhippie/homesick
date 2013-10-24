@@ -22,8 +22,9 @@ include Chef::DSL::IncludeRecipe
 
 action :create do
   new_resource.keys.each do |name, key|
+    simple = key.gsub("/", "_")
 
-    execute "homesick_pull_#{new_resource.username}_#{name}" do
+    execute "homesick_pull_#{new_resource.username}_#{name}_#{simple}" do
       command "homesick pull #{key} --force"
       action :run
 
@@ -38,10 +39,10 @@ action :create do
         ::File.directory? homesick_directory_for(key) and new_commits_for? homesick_directory_for(key)
       end
       
-      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{name}]", :immediately
+      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{name}_#{simple}]", :immediately
     end
 
-    execute "homesick_clone_#{new_resource.username}_#{name}" do
+    execute "homesick_clone_#{new_resource.username}_#{name}_#{simple}" do
       command "homesick clone #{key} --force"
       action :run
 
@@ -56,10 +57,10 @@ action :create do
         ::File.directory? homesick_directory_for(key)
       end
       
-      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{name}]", :immediately
+      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{name}_#{simple}]", :immediately
     end
 
-    execute "homesick_symlink_#{new_resource.username}_#{name}" do
+    execute "homesick_symlink_#{new_resource.username}_#{name}_#{simple}" do
       command "homesick symlink #{key} --force"
       action :nothing
 
@@ -81,7 +82,9 @@ end
 
 action :delete do
   new_resource.keys.each do |name, key|
-    execute "homesick_unlink_#{new_resource.username}_#{name}" do
+    simple = key.gsub("/", "_")
+
+    execute "homesick_unlink_#{new_resource.username}_#{name}_#{simple}" do
       command "homesick unlink #{key}"
       action :run
 
