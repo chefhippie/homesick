@@ -24,4 +24,12 @@ node["homesick"]["packages"].each do |name|
   package name do
     action :install
   end
+
+  execute "update_alternative_#{name}" do
+    command "update-alternatives --auto #{name} 2> /dev/null"
+
+    only_if do
+      name =~ /\Arubygem-.*\z/
+    end
+  end
 end
