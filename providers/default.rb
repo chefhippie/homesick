@@ -30,6 +30,10 @@ action :create do
       user new_resource.username
       group new_resource.group || new_resource.username
 
+      environment(
+        "HOME" => home_directory
+      )
+
       only_if do
         ::File.directory? homesick_directory_for(key) and new_commits_for? homesick_directory_for(key)
       end
@@ -44,6 +48,10 @@ action :create do
       user new_resource.username
       group new_resource.group || new_resource.username
 
+      environment(
+        "HOME" => home_directory
+      )
+
       not_if do
         ::File.directory? homesick_directory_for(key)
       end
@@ -57,6 +65,10 @@ action :create do
 
       user new_resource.username
       group new_resource.group || new_resource.username
+
+      environment(
+        "HOME" => home_directory
+      )
 
       only_if do
         ::File.directory? homesick_directory_for(key)
