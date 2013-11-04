@@ -24,7 +24,7 @@ action :create do
   new_resource.keys.each do |name, key|
     simple = key.gsub("/", "_")
 
-    execute "homesick_pull_#{new_resource.username}_#{name}_#{simple}" do
+    execute "homesick_pull_#{new_resource.username}_#{simple}" do
       command "homesick pull #{key} --force"
       action :run
 
@@ -39,10 +39,10 @@ action :create do
         ::File.directory? homesick_directory_for(key) and new_commits_for? homesick_directory_for(key)
       end
       
-      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{name}_#{simple}]", :immediately
+      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{simple}]", :immediately
     end
 
-    execute "homesick_clone_#{new_resource.username}_#{name}_#{simple}" do
+    execute "homesick_clone_#{new_resource.username}_#{simple}" do
       command "homesick clone #{key} --force"
       action :run
 
@@ -57,10 +57,10 @@ action :create do
         ::File.directory? homesick_directory_for(key)
       end
       
-      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{name}_#{simple}]", :immediately
+      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{simple}]", :immediately
     end
 
-    execute "homesick_symlink_#{new_resource.username}_#{name}_#{simple}" do
+    execute "homesick_symlink_#{new_resource.username}_#{simple}" do
       command "homesick symlink #{key} --force"
       action :nothing
 
@@ -84,7 +84,7 @@ action :delete do
   new_resource.keys.each do |name, key|
     simple = key.gsub("/", "_")
 
-    execute "homesick_unlink_#{new_resource.username}_#{name}_#{simple}" do
+    execute "homesick_unlink_#{new_resource.username}_#{simple}" do
       command "homesick unlink #{key}"
       action :run
 
@@ -109,7 +109,7 @@ def new_commits_for?(directory)
 end
 
 def homesick_directory_for(key)
-  "#{home_directory}/.homesick/repos/#{key}"
+  "#{home_directory}/.homesick/repos/#{key.split("/").last}"
 end
 
 protected
