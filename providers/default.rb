@@ -24,24 +24,6 @@ action :create do
   new_resource.keys.each do |name, key|
     simple = key.gsub("/", "_")
 
-    execute "homesick_pull_#{new_resource.username}_#{simple}" do
-      command "homesick pull #{key} --force"
-      action :run
-
-      user new_resource.username
-      group new_resource.group || new_resource.username
-
-      environment(
-        "HOME" => home_directory
-      )
-
-      only_if do
-        ::File.directory? homesick_directory_for(key) and new_commits_for? homesick_directory_for(key)
-      end
-      
-      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{simple}]", :immediately
-    end
-
     execute "homesick_clone_#{new_resource.username}_#{simple}" do
       command "homesick clone #{key} --force"
       action :run
@@ -60,8 +42,26 @@ action :create do
       notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{simple}]", :immediately
     end
 
+    execute "homesick_pull_#{new_resource.username}_#{simple}" do
+      command "homesick pull #{key.split("/").last} --force"
+      action :run
+
+      user new_resource.username
+      group new_resource.group || new_resource.username
+
+      environment(
+        "HOME" => home_directory
+      )
+
+      only_if do
+        ::File.directory? homesick_directory_for(key) and new_commits_for? homesick_directory_for(key)
+      end
+      
+      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{simple}]", :immediately
+    end
+
     execute "homesick_symlink_#{new_resource.username}_#{simple}" do
-      command "homesick symlink #{key} --force"
+      command "homesick symlink #{key.split("/").last} --force"
       action :nothing
 
       user new_resource.username
