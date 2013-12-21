@@ -22,58 +22,58 @@ include Chef::DSL::IncludeRecipe
 
 action :create do
   new_resource.keys.each do |name, key|
-    simple = key.gsub("/", "_")
+    repo = key.split("/").last
 
-    execute "homesick_pull_#{new_resource.username}_#{simple}" do
-      command "homesick pull #{key.split("/").last} --force"
+    execute "homesick_clone_#{new_resource.username}_#{repo}" do
+      command "git clone git://github.com/#{key}.git #{homesick_directory_for(repo).to_s}"
       action :run
 
       user new_resource.username
       group new_resource.group || new_resource.username
 
       environment(
-        "HOME" => home_directory
+        "HOME" => home_directory.to_s
+      )
+
+      not_if do
+        homesick_directory_for(key).directory?
+      end
+
+      notifies :run, "execute[homesick_link_#{new_resource.username}_#{repo}]", :immediately
+    end
+
+    execute "homesick_pull_#{new_resource.username}_#{repo}" do
+      command "homesick -f pull #{repo}"
+      action :run
+
+      user new_resource.username
+      group new_resource.group || new_resource.username
+
+      environment(
+        "HOME" => home_directory.to_s
       )
 
       only_if do
-        ::File.directory? homesick_directory_for(key) and new_commits_for? homesick_directory_for(key)
+        homesick_directory_for(key).directory?
       end
-      
-      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{simple}]", :immediately
+
+      notifies :run, "execute[homesick_link_#{new_resource.username}_#{repo}]", :immediately
     end
 
-    execute "homesick_symlink_#{new_resource.username}_#{simple}" do
-      command "homesick symlink #{key.split("/").last} --force"
+    execute "homesick_symlink_#{new_resource.username}_#{repo}" do
+      command "homesick -f symlink #{repo}"
       action :nothing
 
       user new_resource.username
       group new_resource.group || new_resource.username
 
       environment(
-        "HOME" => home_directory
+        "HOME" => home_directory.to_s
       )
 
       only_if do
-        ::File.directory? homesick_directory_for(key)
+        homesick_directory_for(key).directory?
       end
-    end
-
-    execute "homesick_clone_#{new_resource.username}_#{simple}" do
-      command "homesick clone #{key} --force"
-      action :run
-
-      user new_resource.username
-      group new_resource.group || new_resource.username
-
-      environment(
-        "HOME" => home_directory
-      )
-
-      not_if do
-        ::File.directory? homesick_directory_for(key)
-      end
-      
-      notifies :run, "execute[homesick_symlink_#{new_resource.username}_#{simple}]", :immediately
     end
   end
 
@@ -82,46 +82,39 @@ end
 
 action :delete do
   new_resource.keys.each do |name, key|
-    simple = key.gsub("/", "_")
+    repo = key.split("/").last
 
-    execute "homesick_unlink_#{new_resource.username}_#{simple}" do
-      command "homesick unlink #{key}"
-      action :run
-
-      user new_resource.username
-      group new_resource.group || new_resource.username
-
-      only_if do
-        ::File.directory? homesick_directory_for(key)
-      end
-    end
+    # TODO: unlink outdated files
     
-    directory homesick_directory_for(key) do
+    directory homesick_directory_for(key).to_s do
       action :delete
     end
+
+    # TODO: check if repos is empty
+
   end
 
   new_resource.updated_by_last_action(true)
 end
 
-def new_commits_for?(directory)
-  `cd #{directory}; git rev-list HEAD...origin/master --count`.strip != "0"
-end
-
 def homesick_directory_for(key)
-  "#{home_directory}/.homesick/repos/#{key.split("/").last}"
+  home_directory.join(".homesick", "repos", key.split("/").last)
 end
 
 protected
 
 def home_directory
-  if new_resource.home
-    new_resource.home
-  else
-    if new_resource.username == "root"
-      "/root"
+  @homedirectory ||= begin
+    value = if new_resource.home
+      new_resource.home
     else
-      "/home/#{new_resource.username}"
+      if new_resource.username == "root"
+        "/root"
+      else
+        "/home/#{new_resource.username}"
+      end
     end
+
+    ::Pathname.new value
   end
 end

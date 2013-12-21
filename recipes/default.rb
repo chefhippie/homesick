@@ -20,6 +20,12 @@
 include_recipe "git"
 include_recipe "ruby"
 
+node["homesick"]["gems"].each do |name|
+  gem_package name do
+    action :install
+  end
+end
+
 node["homesick"]["packages"].each do |name|
   package name do
     action :install

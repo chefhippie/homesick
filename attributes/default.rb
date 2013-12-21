@@ -17,6 +17,23 @@
 # limitations under the License.
 #
 
-default["homesick"]["packages"] = %w(
-  rubygem-homesick
-)
+case node["platform_family"]
+when "debian"
+  default["homesick"]["packages"] = %w()
+
+  default["homesick"]["gems"] = %w(
+    homesick
+  )
+when "ubuntu"
+  default["homesick"]["packages"] = %w()
+
+  default["homesick"]["gems"] = %w(
+    homesick
+  )
+when "suse"
+  default["homesick"]["packages"] = %w(
+    rubygem-homesick
+  )
+
+  default["homesick"]["gems"] = %w()
+end
