@@ -17,23 +17,22 @@
 # limitations under the License.
 #
 
-case node["platform_family"]
-when "debian"
-  default["homesick"]["packages"] = %w()
-
-  default["homesick"]["gems"] = %w(
-    homesick
-  )
-when "ubuntu"
-  default["homesick"]["packages"] = %w()
-
-  default["homesick"]["gems"] = %w(
-    homesick
-  )
-when "suse"
-  default["homesick"]["packages"] = %w(
+default["homesick"]["packages"] = value_for_platform_family(
+  "debian" => %w(
+  ),
+  "ubuntu" => %w(
+  ),
+  "suse" => %w(
     rubygem-homesick
   )
-
-  default["homesick"]["gems"] = %w()
-end
+)
+default["homesick"]["gems"] = value_for_platform_family(
+  "debian" => %w(
+    homesick
+  ),
+  "ubuntu" => %w(
+    homesick
+  ),
+  "suse" => %w(
+  )
+)
