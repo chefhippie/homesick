@@ -20,17 +20,12 @@
 default["homesick"]["packages"] = value_for_platform_family(
   "debian" => %w(
   ),
-  "ubuntu" => %w(
-  ),
   "suse" => [
     "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-homesick"
   ]
 )
 default["homesick"]["gems"] = value_for_platform_family(
   "debian" => %w(
-    homesick
-  ),
-  "ubuntu" => %w(
     homesick
   ),
   "suse" => %w(
